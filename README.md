@@ -2,7 +2,7 @@
 
 DinerDash is a Java-based game that imitates the game Overcooked. This is done for ICS4U class
 
-![Image of Extension](https://github.com/alvanli/chrome_chat/blob/master/sample_screen.png)
+![Image of Extension](https://github.com/alvanli/Diner_Dash/blob/master/screen.PNG)
 
 
 # Languages used
