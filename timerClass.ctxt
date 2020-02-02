@@ -1,0 +1,12 @@
+#BlueJ class context
+comment0.target=timerClass
+comment0.text=\r\n\ Creates\ a\ "progress\ bar"\ with\ parameters\ timeNeed\ (the\ time\ for\ a\ food\ item\ to\r\n\ process),\ as\ well\ as\ the\ length\ and\ width\ of\ the\ bar\r\n\ \r\n\ @\ Alvin\ Li\r\n\ @\ May\ 30\ 2019\r\n
+comment1.params=timeNeed\ l\ w
+comment1.target=timerClass(int,\ int,\ int)
+comment2.params=world
+comment2.target=void\ addedToWorld(greenfoot.World)
+comment3.params=
+comment3.target=void\ act()
+comment4.params=
+comment4.target=void\ newRGB()
+numComments=5

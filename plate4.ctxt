@@ -1,0 +1,11 @@
+#BlueJ class context
+comment0.target=plate4
+comment0.text=\r\n\ Write\ a\ description\ of\ class\ plate4\ here.\r\n\ \r\n\ @author\ (your\ name)\ \r\n\ @version\ (a\ version\ number\ or\ a\ date)\r\n
+comment1.params=world
+comment1.target=void\ addedToWorld(greenfoot.World)
+comment1.text=\r\n\ if\ hasFood[i]\ \=\=\ 1,\ it\ has\ the\ food\r\n\ hasFood[1]\ \=\=>\ bokchoi\r\n\ hasFood[2]\ \=\=>\ broccoli\r\n\ hasFood[3]\ \=\=>\ beef\r\n\ hasFood[4]\ \=\=>\ chicken\r\n
+comment2.params=
+comment2.target=void\ act()
+comment3.params=
+comment3.target=void\ checkFood()
+numComments=4

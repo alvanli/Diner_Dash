@@ -1,0 +1,26 @@
+#BlueJ class context
+comment0.target=Bokchoi
+comment0.text=\r\n\ This\ class\ provides\ the\ images\ of\ the\ food\ item,\ and\ makes\ the\ images\ follow\ the\ chef\ around\r\n\ \r\n\ @\ Alvin\ Li\ \r\n\ @\ Started\ on\ May\ 28\ 2019\ \r\n\ @\ Updated\ until\ May\ 30\ 2019\r\n
+comment1.params=world
+comment1.target=void\ addedToWorld(greenfoot.World)
+comment1.text=\r\n\ 0\ -->\ raw\r\n\ 1\ -->\ chopped\r\n\ 2\ -->\ cooked\r\n
+comment2.params=
+comment2.target=void\ act()
+comment3.params=a
+comment3.target=void\ follow(greenfoot.Actor)
+comment3.text=\r\n\ Allows\ the\ food\ item\ to\ follow\ the\ chef\ around\ the\ kitchen\r\n
+comment4.params=
+comment4.target=void\ checkUnEquip()
+comment4.text=\r\n\ If\ not\ holding\ the\ item\ anymore,\ delete\ the\ item\ from\ the\ world\r\n
+comment5.params=
+comment5.target=void\ changeImg()
+comment6.params=kitchen
+comment6.target=void\ snapToKitchen(int)
+comment7.params=table
+comment7.target=void\ snapToTable(int)
+comment8.params=fx\ changed
+comment8.target=int\ isCooking(int,\ int)
+comment9.params=fx\ changed
+comment9.target=int\ status(int,\ int)
+comment9.text=\r\n\ fx\ \=\ 1\ -->\ get\ status\r\n\ fx\ \=\ 2\ -->\ edit\ status\r\n\ \r\n
+numComments=10

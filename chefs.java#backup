@@ -1,0 +1,469 @@
+import greenfoot.*;  // (World, Actor, GreenfootImage, Greenfoot and MouseInfo)
+import java.util.*;
+/**
+ * This class controls the chef's actions, including walking, picking up food, chopping food and cooking food
+ * 
+ * @ Alvin Li
+ * @ Date: May 31 3PM
+ */
+public class chefs extends Actor
+{
+    /**
+     * Act - do whatever the chefs wants to do. This method is called whenever
+     * the 'Act' or 'Run' button gets pressed in the environment.
+     */
+    private GreenfootImage picAnimate[][] = new GreenfootImage[9][9];
+    private int speed = 4;
+    /**
+     * each thing in the array represents a direction, if that direction == 1, their lastMove is that direction
+     * lastMove[0] --> up
+     * lastMove[1] --> down
+     * lastMove[2] --> left
+     * lastMove[3] --> right
+     */
+    private int[] lastMove = new int[4]; 
+    private int pic = 0;
+    private kitchen world;
+    private int frame = 0;
+
+    /**
+     * 0 --> not holding/ touching anything
+     * 1 --> Bokchoy
+     * 2 --> Broccoli
+     * 3 --> Beef
+     * 4 --> Chicken
+     */
+    public static int holding = 0;
+    public static int touching = 0;
+
+    public static int cookieHold = 0;
+    public static int keyHold = 0;
+    private long start; 
+
+    public void addedToWorld(World world)
+    {
+        //load images into 2D array 
+        for (int i = 0; i < 4; i++)
+        {
+            for (int n = 0;  n < 9; n++) 
+            {
+                picAnimate[i][n] = new GreenfootImage("animation"+ (i) +"" + n + ".png");
+                //System.out.println("loaded");
+                picAnimate[i][n].scale(picAnimate[i][n].getWidth()+32, picAnimate[i][n].getHeight()+25);
+            }
+        }
+        for (int i = 4; i < 8; i++)
+        {
+            for (int n = 0;  n < 6; n++)
+            {
+                picAnimate[i][n] = new GreenfootImage("animation"+ (i) + n + ".png");
+                picAnimate[i][n].scale(picAnimate[i][n].getWidth()+32, picAnimate[i][n].getHeight()+25);
+            }
+        }
+        setImage(picAnimate[1][0]);
+    }
+
+    public void act() 
+    {
+        ctrlMove();
+        touching = checkInterac();
+        holdStuff();
+        checkCutFoods();
+        checkCookFoods();
+    }   
+
+    public void ctrlMove()
+    {
+        /**
+         * WASD to control chef to go left right up down
+         */
+        int oldX = this.getX();
+        int oldY = this.getY();
+        int newX = this.getX();
+        int newY = this.getY();
+        if (Greenfoot.isKeyDown("w") || Greenfoot.isKeyDown("up"))
+        {
+            newY -= speed;
+            resetMove();
+            lastMove[0] = 1;
+            animate();
+        }
+        else if (Greenfoot.isKeyDown("s") || Greenfoot.isKeyDown("down"))
+        {
+            newY += speed;
+            resetMove();
+            lastMove[1] = 1;
+            animate();
+        }
+        else if (Greenfoot.isKeyDown("a") || Greenfoot.isKeyDown("left"))
+        {
+            newX -= speed;
+            resetMove();
+            lastMove[2] = 1;
+            animate();
+        }
+        else if (Greenfoot.isKeyDown("d") || Greenfoot.isKeyDown("right"))
+        {
+            newX += speed;
+            resetMove();
+            lastMove[3] = 1;
+            animate();
+        }
+        Bokchoi f = (Bokchoi)getOneObjectAtOffset(-20,0,Bokchoi.class);
+        if (f != null && f.isCooking(1,0) != 1)
+        {
+            f.follow();
+        }
+
+        //Prevent chef from going out of the kitchen, this chef is destined to stay in this kitchen FOREVER!!! This prisoner must not escape
+        if (newY > 436 || newY < 160)
+        {
+            newY = oldY;
+        }
+        if (newY <= 308)
+        {
+            if (newX < 205)
+            {
+                newX = 205;
+            }
+            else if (newX > 780)
+            {
+                newX = 780;
+            }
+        }
+        else if (newY > 308)
+        {
+            if (newX < 180)
+            {
+                newX = 180;
+            }
+            else if (newX > 794)
+            {
+                newX = 794;
+            }
+        }
+        this.setLocation(newX, newY);
+    }
+
+    //convert last move to direction as Alvin realizes direction may be easier than the lastMove array
+    private int lastMoveToDir()
+    {
+        int direction = 0;
+        if (lastMove[0] == 1)
+        {
+            direction = 0;
+        }
+        else if (lastMove[1] == 1)
+        {
+            direction = 1;
+        }
+        else if (lastMove[2] == 1)
+        {
+            direction = 2;
+        }
+        else if (lastMove[3] == 1)
+        {
+            direction = 3;
+        }
+        return direction;
+    }
+
+    //moving animations
+    private void animate ()
+    {
+        int direction = lastMoveToDir();
+
+        //Every 10 frames, increment animation picture by 1
+        if (frame == 0){
+            frame = 8;
+        }
+        if (frame == 1){            
+            pic++;
+            //System.out.println(direction + " " + pic);
+            setImage(picAnimate[direction][pic]);
+            if (pic >= 8){
+                pic = 0;
+            }
+        }
+        if (frame > 0){
+            frame --;
+        }
+    }
+
+    //To reset last move
+    private void resetMove()
+    {
+        for (int i = 0; i < 4; i++)
+        {
+            lastMove[i] = 0;
+        }
+    }
+
+    //Check where the chef is in the kitchen to equip items or perform special moves
+    private int checkInterac()
+    {
+        int x = this.getX();
+        int y = this.getY();
+        if (x >= 180 && x <= 210 && y <= 344 && y >= 160)
+        {
+            getWorld().removeObjects(getWorld().getObjects(speechPickFood.class));
+            getWorld().addObject(new speechPickFood(), x-40, y-70);       
+            if (x >= 180 && x <= 205 && y >= 304 && y < 344)
+            {
+                //Bok Choi
+                return 1; 
+            }
+            else if (x >= 205 && x <= 210 && y >= 240 && y <= 284)
+            {
+                //Broccoli
+                return 2;
+            }
+            else if (x >= 205 && x <= 210 && y >= 192 && y <= 239)
+            {
+                //Beef
+                return 3;
+            }
+            else if (x >= 205 && x <= 210 && y >= 160 && y <= 190)
+            {
+                //chicken
+                return 4;
+            }
+        }
+        else
+        {
+            getWorld().removeObjects(getWorld().getObjects(speechPickFood.class));
+            return 0;          
+        }
+        return 0;
+    }
+
+    //Check which items to cut, when chef is near the cutting boards
+    public void checkCutFoods()
+    {
+        int x = this.getX();
+        int y = this.getY();
+        //Right cutting board
+        if ((x<=373 && x>=325) && (y<=437 && y>=424))
+        {            
+            getWorld().removeObjects(getWorld().getObjects(speechCutFood.class));
+            getWorld().addObject(new speechCutFood(), x-40, y-70);            
+            if (Greenfoot.isKeyDown("enter"))
+            {
+                getWorld().removeObjects(getWorld().getObjects(speechCutFood.class));
+                if (holding == 1) //bokchoy
+                {
+                    //Actor bokchoy = (Actor)getWorld().getObjects(Bokchoi.class).get(0);
+                    //bokchoy.getImage().setTransparency(0);
+                    if (keyHold != 1)
+                    {
+                        keyHold = 1;
+                        getWorld().addObject(new cloud(), this.getX(), this.getY()+10);
+                    }
+                    if (frame == 0){
+                        frame = 5;
+                    }
+                    if (frame == 1){            
+                        pic++;
+                        //System.out.println(direction + " " + pic);
+                        setImage(picAnimate[6][pic]);
+                        if (pic >= 5){
+                            pic = 0;
+                        }
+                    }
+                    if (frame > 0){
+                        frame --;
+                    }                
+                }
+                else if (holding == 2) //broccoli
+                {
+                    if (keyHold != 2)
+                    {
+                        keyHold = 2;
+                        getWorld().addObject(new cloud(), this.getX(), this.getY()+10);
+                    }
+                    if (frame == 0){
+                        frame = 5;
+                    }
+                    if (frame == 1){            
+                        pic++;
+                        //System.out.println(direction + " " + pic);
+                        setImage(picAnimate[6][pic]);
+                        if (pic >= 5){
+                            pic = 0;
+                        }
+                    }
+                    if (frame > 0){
+                        frame --;
+                    }    
+                }
+                else if (holding == 3) //beef
+                {
+
+                }
+                else if (holding == 4) //chicken
+                {
+
+                }
+            }
+            else
+            {
+                keyHold = 0;               
+                for (Actor obj : getWorld().getObjects(Bokchoi.class))
+                {
+                    obj.getImage().setTransparency(255);
+                }
+                for (Actor obj : getWorld().getObjects(broccoli.class))
+                {
+                    obj.getImage().setTransparency(255);
+                }
+                getWorld().removeObjects(getWorld().getObjects(cloud.class));
+                getWorld().removeObject(cuttingBoard.);
+            }
+        }
+        else
+        {
+            getWorld().removeObjects(getWorld().getObjects(speechCutFood.class));
+        }
+    }
+
+    //check which items to cook, when chef is near stove
+    public void checkCookFoods()
+    {
+        int x = this.getX();
+        int y = this.getY();
+        int[] timeNeed = {0,30,25,25,25};
+        timerClass flaTimer = new timerClass(1,2,2);
+        double timePassed = ((double)(System.currentTimeMillis() - start))/1000;
+        int kitchen = 0;
+        Bokchoi f = (Bokchoi)getOneObjectAtOffset(-20,0,Bokchoi.class);
+        if (((x <= 361 && x >= 317) && (y <= 188 && y>=160)) || ((x <= 420 && x >= 380) && (y <= 188 && y >= 160)))
+        {
+            //System.out.println(flaTimer.whatTimeMrWolf() > timeNeed[holding]);
+            getWorld().removeObjects(getWorld().getObjects(speechStartCook.class));
+            if (cookieHold != 1)
+            {
+                getWorld().addObject(new speechStartCook(), x-40, y-70);       
+            }
+            if (cookieHold == 1  && Greenfoot.isKeyDown("shift"))
+            {
+                getWorld().removeObjects(getWorld().getObjects(timerClass.class));
+                //Actor k1 = (Actor)getWorld().getObjects(kitchen1.class).get(0);
+                f = (Bokchoi)kitchen1.food;
+                if (timePassed > timeNeed[cookieHold] * 1.8)
+                {
+                    getWorld().removeObject(getOneObjectAtOffset(0,0,Bokchoi.class));
+                    holding = 0;
+                }
+                //System.out.println(flaTimer.whatTimeMrWolf() + " " + timeNeed[holding]);
+                if (timePassed > timeNeed[cookieHold] && f != null)
+                {
+                    f.status(2,2);
+                    holding = 1;
+                    f.isCooking(2,0);
+                    f.follow();
+                    //editThis getWorld().addObject(f,this.getX()-20, this.getY());
+                    //System.out.println("alkvjdnekajrfbdvc");
+                    getWorld().removeObjects(getWorld().getObjects(timerClass.class));
+                }
+                
+                if (timePassed < timeNeed[cookieHold] && f != null)
+                {
+                    holding = 1;
+                    f.isCooking(2,0);
+                    f.follow();
+                    //getWorld().addObject(f,this.getX()-20, this.getY());
+                    getWorld().removeObjects(getWorld().getObjects(timerClass.class));
+                }
+                cookieHold = 0;
+            }
+            if ((holding == 1 && f != null && f.status(1,0) == 1) && Greenfoot.isKeyDown("enter"))
+            {
+                kitchen = getKitchen(x,y);
+                
+                //Bokchoi f = (Bokchoi)getOneObjectAtOffset(-20,0,Bokchoi.class);
+                if (f != null)
+                {
+                    f.snapToKitchen(kitchen);
+                }
+                if (cookieHold == 0)
+                {
+                    cookieHold = 1;
+                    getWorld().removeObject(flaTimer);
+                    getWorld().addObject(new flame(), this.getX(), this.getY()+10);
+                    start = System.currentTimeMillis();
+                    flaTimer = null;
+                    flaTimer = new timerClass(timeNeed[holding],10,30);
+                    holding = 0;
+                    getWorld().addObject(flaTimer,this.getX(),this.getY());
+                    getWorld().removeObjects(getWorld().getObjects(speechStartCook.class));
+                    getWorld().removeObjects(getWorld().getObjects(speechStopCook.class));
+                    getWorld().addObject(new speechStopCook(), x-40, y-70);  
+                    //System.out.println(flaTimer.whatTimeMrWolf());
+                }
+            }
+        }
+        else
+        {
+            getWorld().removeObjects(getWorld().getObjects(speechStartCook.class));
+            getWorld().removeObjects(getWorld().getObjects(speechStopCook.class));
+        }
+    }
+
+    //get kitchen number, returns 1 for left kitchen, 2 for right kitchen
+    private int getKitchen(int x, int y)
+    {
+        if  ((x <= 361 && x >= 317) && (y <= 188 && y>=160))
+        {
+            return 1;
+        }
+        else if ((x <= 420 && x >= 380) && (y <= 188 && y >= 160))
+        {
+            return 2;
+        }
+        else 
+        {
+            return 0;
+        }
+
+    }
+
+    // When the chef is touching a food item, and pressing enter, he holds the item
+    private void holdStuff()
+    {
+        int x = this.getX();
+        int y = this.getY();
+        if (Greenfoot.isKeyDown("enter"))
+        {
+            if (touching == 1 && holding != 1)
+            {
+                holding = 1;
+                getWorld().addObject(new Bokchoi(), x,y); 
+            }
+            else if (touching ==2)
+            {
+                holding = 2;
+                getWorld().addObject(new broccoli(), x,y); 
+            }
+            else if (touching == 3)
+            {
+                holding = 3;
+                getWorld().addObject(new beef(), x,y); 
+            }
+            else if (touching == 4)
+            {
+                holding = 4;
+                getWorld().addObject(new chicken(), x,y); 
+            }
+        }        
+        //if user presses backspace, unequip everything
+        else if (Greenfoot.isKeyDown("backspace"))
+        {
+            holding = 0;
+            getWorld().removeObject(getOneObjectAtOffset(-20,0,Bokchoi.class));
+            getWorld().removeObject(getOneObjectAtOffset(-20,0,chicken.class));
+            getWorld().removeObject(getOneObjectAtOffset(-20,0,broccoli.class));
+            getWorld().removeObject(getOneObjectAtOffset(-20,0,beef.class));
+        }
+    }
+
+}
